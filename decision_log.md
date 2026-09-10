@@ -131,3 +131,16 @@ real data (brand choice, taxonomy specifics, threshold values).
     sample, so the worst `account_access_or_security` and
     `driver_conduct_complaint` cases still escalate via that rule even though
     the intent itself isn't blanket-escalated.
+17. **LLM provider is Google Gemini (free tier via Google AI Studio), not
+    Anthropic.** Originally built against the Anthropic API, but Anthropic's
+    API has no free tier (prepaid credits only, ~$5 minimum), and the person
+    building this preferred not to pay for it. The assignment explicitly
+    allows "any LLM API or open model," and Gemini's free tier (no card
+    required) covers everything this pipeline needs at its subsampled scale.
+    Every call goes through the single `src/llm_client.complete()` function,
+    so this was a one-file swap (`google-genai` SDK instead of `anthropic`)
+    with zero changes needed anywhere else in `src/` or `eval/` -- see
+    `src/llm_client.py`'s docstring. `gemini-2.5-flash` is used for all three
+    roles (classify/draft/judge) by default since it's fast and comfortably
+    inside free-tier limits; swap in a stronger model per-role via `.env` if
+    quality warrants it and quota allows.

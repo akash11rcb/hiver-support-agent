@@ -1,21 +1,22 @@
-"""Thin wrapper around the Anthropic API with:
-  - retry/backoff (tenacity) for transient errors,
+"""Thin wrapper around the Gemini API (Google AI Studio, free tier) with:
+  - retry/backoff (tenacity) for transient errors (rate limits especially --
+    the free tier is rate-limited, not just cost-limited),
   - an on-disk JSONL cache keyed by (model, prompt hash) so re-running the
-    pipeline (or the eval harness) doesn't re-pay for or re-roll every call --
-    this is what keeps "reproduce in under 15 minutes" honest after the first
-    run, and keeps repeated eval runs deterministic.
+    pipeline (or the eval harness) doesn't re-call the API or re-roll every
+    result -- this is what keeps "reproduce in under 15 minutes" honest after
+    the first run, keeps repeated eval runs deterministic, and matters extra
+    here because the free tier has a daily request quota.
 
-Nothing else in the repo should import `anthropic` directly -- everything
-goes through `complete()` so caching/retries/logging are consistent and so
-swapping providers later is a one-file change.
+Nothing else in the repo imports `google.genai` directly -- everything goes
+through `complete()` so caching/retries/logging are consistent and swapping
+providers later (see decision_log.md for why this is Gemini, not Anthropic)
+is a one-file change.
 """
 from __future__ import annotations
 
 import hashlib
 import json
-import os
 import threading
-from pathlib import Path
 
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
@@ -30,13 +31,14 @@ _cache: dict[str, str] | None = None
 def _get_client():
     global _client
     if _client is None:
-        import anthropic
+        from google import genai
 
-        if not config.ANTHROPIC_API_KEY:
+        if not config.GEMINI_API_KEY:
             raise RuntimeError(
-                "ANTHROPIC_API_KEY is not set. Copy .env.example to .env and fill it in."
+                "GEMINI_API_KEY is not set. Copy .env.example to .env and fill it in "
+                "(get a free key at https://aistudio.google.com/apikey)."
             )
-        _client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+        _client = genai.Client(api_key=config.GEMINI_API_KEY)
     return _client
 
 
@@ -73,7 +75,7 @@ def _append_cache(key: str, response: str) -> None:
         _load_cache()[key] = response
 
 
-@retry(wait=wait_random_exponential(min=1, max=20), stop=stop_after_attempt(5))
+@retry(wait=wait_random_exponential(min=2, max=30), stop=stop_after_attempt(6))
 def complete(
     prompt: str,
     system: str = "",
@@ -82,7 +84,9 @@ def complete(
     temperature: float = 0.0,
     use_cache: bool = True,
 ) -> str:
-    """Single-turn completion. Returns the text of the first content block."""
+    """Single-turn completion. Returns the model's text output."""
+    from google.genai import types
+
     model = model or config.DRAFTER_MODEL
     cache = _load_cache()
     key = _cache_key(model, system, prompt, temperature)
@@ -90,16 +94,16 @@ def complete(
         return cache[key]
 
     client = _get_client()
-    resp = client.messages.create(
+    response = client.models.generate_content(
         model=model,
-        max_tokens=max_tokens,
-        temperature=temperature,
-        system=system or "",
-        messages=[{"role": "user", "content": prompt}],
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            system_instruction=system or None,
+            max_output_tokens=max_tokens,
+            temperature=temperature,
+        ),
     )
-    text = "".join(
-        block.text for block in resp.content if getattr(block, "type", None) == "text"
-    )
+    text = response.text or ""
     if use_cache:
         _append_cache(key, text)
     return text

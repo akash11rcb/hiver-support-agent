@@ -34,10 +34,16 @@ def brand_conversations_path(brand: str | None = None) -> Path:
     safe_name = "".join(c if c.isalnum() else "_" for c in brand)
     return EXTRACTED_DIR / f"{safe_name}.json"
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-CLASSIFIER_MODEL = os.getenv("CLASSIFIER_MODEL", "claude-haiku-4-5")
-DRAFTER_MODEL = os.getenv("DRAFTER_MODEL", "claude-sonnet-4-5")
-JUDGE_MODEL = os.getenv("JUDGE_MODEL", "claude-sonnet-4-5")
+# LLM provider: Google Gemini (free tier via Google AI Studio, no card
+# required) -- see decision_log.md for why this replaced the originally
+# planned Anthropic API. The assignment permits "any LLM API or open model";
+# nothing else in the repo assumes a specific provider (everything goes
+# through src/llm_client.complete()), so this is a one-file swap if you'd
+# rather point it at a different provider/key.
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+CLASSIFIER_MODEL = os.getenv("CLASSIFIER_MODEL", "gemini-2.5-flash")
+DRAFTER_MODEL = os.getenv("DRAFTER_MODEL", "gemini-2.5-flash")
+JUDGE_MODEL = os.getenv("JUDGE_MODEL", "gemini-2.5-flash")
 
 # Subsample sizes -- kept small deliberately so the full pipeline reproduces
 # in well under 15 minutes on a laptop with no GPU. See README "Reproducing

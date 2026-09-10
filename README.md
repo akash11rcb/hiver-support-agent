@@ -17,7 +17,7 @@ and the "what's misleading about my headline number" section. See
 ```bash
 python -m venv .venv && source .venv/bin/activate   # optional but recommended
 pip install -r requirements.txt
-cp .env.example .env   # then fill in ANTHROPIC_API_KEY
+cp .env.example .env   # then fill in GEMINI_API_KEY (free, no card: https://aistudio.google.com/apikey)
 ```
 
 ## Getting the data

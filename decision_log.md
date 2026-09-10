@@ -144,3 +144,17 @@ real data (brand choice, taxonomy specifics, threshold values).
     roles (classify/draft/judge) by default since it's fast and comfortably
     inside free-tier limits; swap in a stronger model per-role via `.env` if
     quality warrants it and quota allows.
+18. **The LLM-dependent scripts (03 onward) are run on the developer's own
+    machine, not from the build/orchestration environment.** Two independent
+    network restrictions stacked: the orchestration sandbox can reach GitHub/
+    PyPI but not Google's Gemini endpoint either, and its remote-command tool
+    for the connected machine failed outright (unrelated to Gemini). Since
+    the scripts are already plain `python scripts/0X_*.py` invocations with
+    no assumption about *where* they run (see script docstrings), the fix
+    was operational, not architectural: package `src/`, `eval/`, `scripts/`,
+    the extracted data, and a filled-in `.env` and run them where the
+    network access and the Python environment actually are. A reviewer
+    running this repo normally (their own machine, no sandboxing) never
+    encounters this distinction -- it only matters for how this particular
+    build happened, which is why it's logged here rather than reflected in
+    any code.

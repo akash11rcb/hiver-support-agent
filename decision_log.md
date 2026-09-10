@@ -158,3 +158,18 @@ real data (brand choice, taxonomy specifics, threshold values).
     encounters this distinction -- it only matters for how this particular
     build happened, which is why it's logged here rather than reflected in
     any code.
+19. **Model default changed again: `gemini-2.0-flash`, not `gemini-3.6-flash`.**
+    The newest model has only a 20-requests/day free quota (brand-new models
+    get the stingiest free tier); an older, established model has a much
+    more usable daily allowance. Added `scripts/00_test_llm.py` -- a single
+    cheap call -- to sanity-check any model/quota combination before pointing
+    a 200-call script at it, after burning real quota discovering this the
+    hard way.
+20. **Scripts 03 and 04 (the expensive LLM-calling ones) are resumable and
+    save incrementally, not just at the end.** Originally both buffered
+    everything in memory and wrote once at the end -- fine on a paid API,
+    risky on a free tier with a real daily quota: a quota exhaustion or any
+    other mid-run failure would have silently lost all progress. Both now
+    append each completed row to disk immediately and skip rows already
+    present on a re-run, so a multi-day free-tier run (quota resets ~24h)
+    is a real, intended way to complete this pipeline, not a failure mode.

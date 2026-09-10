@@ -41,9 +41,9 @@ def brand_conversations_path(brand: str | None = None) -> Path:
 # through src/llm_client.complete()), so this is a one-file swap if you'd
 # rather point it at a different provider/key.
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-CLASSIFIER_MODEL = os.getenv("CLASSIFIER_MODEL", "gemini-2.5-flash")
-DRAFTER_MODEL = os.getenv("DRAFTER_MODEL", "gemini-2.5-flash")
-JUDGE_MODEL = os.getenv("JUDGE_MODEL", "gemini-2.5-flash")
+CLASSIFIER_MODEL = os.getenv("CLASSIFIER_MODEL", "gemini-3.6-flash")
+DRAFTER_MODEL = os.getenv("DRAFTER_MODEL", "gemini-3.6-flash")
+JUDGE_MODEL = os.getenv("JUDGE_MODEL", "gemini-3.6-flash")
 
 # Subsample sizes -- kept small deliberately so the full pipeline reproduces
 # in well under 15 minutes on a laptop with no GPU. See README "Reproducing

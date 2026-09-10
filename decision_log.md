@@ -173,3 +173,30 @@ real data (brand choice, taxonomy specifics, threshold values).
     append each completed row to disk immediately and skip rows already
     present on a re-run, so a multi-day free-tier run (quota resets ~24h)
     is a real, intended way to complete this pipeline, not a failure mode.
+21. **Model default changed again: `gemini-3.5-flash-lite`, and the client
+    now self-throttles to a requests-per-minute cap instead of only
+    retrying after the fact.** `gemini-2.5-flash` and `gemini-2.0-flash`
+    were both retired for this account (404, redirecting to
+    `gemini-3.6-flash`, which is itself capped at 20 req/day on the free
+    tier -- see #19). Rather than trust that redirect, `scripts/
+    00b_find_working_model.py` was added to cheaply sweep several current
+    candidate model IDs (no retry loop per guess, so a bad guess fails in
+    under a second) instead of discovering each dead end through a slow
+    6x-backoff retry. It found `gemini-3.5-flash-lite` and
+    `gemini-3.1-flash-lite` both working; `gemini-flash-latest` also
+    "succeeded" but returned an empty string under a small max_output_tokens
+    budget -- almost certainly a reasoning-capable alias spending its whole
+    token budget on hidden thinking tokens before ever emitting output, so
+    it was excluded as unsafe to depend on for silent-empty-output reasons.
+    Separately, the real free-tier constraint turned out to be a
+    per-MINUTE cap (15 RPM for this model, confirmed by the 429 error's
+    `quotaId: ...PerMinute...`), not a daily one as originally assumed in
+    #19 -- and 6 retry attempts with random exponential backoff (2-30s)
+    were not reliably outlasting a 60-second window before giving up.
+    Fixed at the root: `llm_client.py` now tracks a sliding window of the
+    last N call timestamps and sleeps before any call that would exceed
+    `REQUESTS_PER_MINUTE` (default 12, a margin under the real 15), so a
+    long run paces itself smoothly instead of bursting into errors that
+    retry-with-backoff then has to gamble on outlasting. Retry is kept as a
+    secondary safety net (now 4 attempts, 5-65s) for genuinely transient
+    failures, not as the primary defense against a *predictable* limit.

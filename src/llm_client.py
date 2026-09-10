@@ -1,22 +1,29 @@
 """Thin wrapper around the Gemini API (Google AI Studio, free tier) with:
-  - retry/backoff (tenacity) for transient errors (rate limits especially --
-    the free tier is rate-limited, not just cost-limited),
+  - a self-imposed rate limiter that paces calls to stay under the free
+    tier's per-MINUTE request cap (not a daily cap -- see decision_log.md),
+    so a long run throttles itself smoothly instead of bursting into 429s
+    that a plain retry-with-backoff can't reliably outlast inside one
+    60-second window,
+  - retry/backoff (tenacity) as a safety net on top of that for genuinely
+    transient errors,
   - an on-disk JSONL cache keyed by (model, prompt hash) so re-running the
     pipeline (or the eval harness) doesn't re-call the API or re-roll every
     result -- this is what keeps "reproduce in under 15 minutes" honest after
-    the first run, keeps repeated eval runs deterministic, and matters extra
-    here because the free tier has a daily request quota.
+    the first run (cached calls skip both the rate limiter and the network
+    call entirely) and keeps repeated eval runs deterministic.
 
 Nothing else in the repo imports `google.genai` directly -- everything goes
-through `complete()` so caching/retries/logging are consistent and swapping
-providers later (see decision_log.md for why this is Gemini, not Anthropic)
-is a one-file change.
+through `complete()` so caching/retries/rate-limiting are consistent and
+swapping providers later (see decision_log.md for why this is Gemini, not
+Anthropic) is a one-file change.
 """
 from __future__ import annotations
 
 import hashlib
 import json
 import threading
+import time
+from collections import deque
 
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
@@ -26,6 +33,28 @@ _client = None
 _lock = threading.Lock()
 _cache_path = config.ROOT / ".cache" / "llm_cache.jsonl"
 _cache: dict[str, str] | None = None
+
+# --- rate limiter -----------------------------------------------------
+# Sliding-window: track the timestamp of each of the last REQUESTS_PER_MINUTE
+# real API calls; before making a new one, sleep just long enough that the
+# oldest of those has aged out of the trailing 60s window. This is what
+# actually prevents the 429s scripts/03 and 04 hit (see decision_log.md) --
+# retry/backoff alone was not reliably outlasting the window.
+_rate_lock = threading.Lock()
+_call_times: deque[float] = deque()
+
+
+def _throttle() -> None:
+    while True:
+        with _rate_lock:
+            now = time.monotonic()
+            while _call_times and now - _call_times[0] > 60:
+                _call_times.popleft()
+            if len(_call_times) < config.REQUESTS_PER_MINUTE:
+                _call_times.append(now)
+                return
+            sleep_for = 60 - (now - _call_times[0]) + 0.25
+        time.sleep(max(sleep_for, 0.1))
 
 
 def _get_client():
@@ -87,7 +116,7 @@ def unwrap_retry_error(e: Exception) -> Exception:
     return e
 
 
-@retry(wait=wait_random_exponential(min=2, max=30), stop=stop_after_attempt(6))
+@retry(wait=wait_random_exponential(min=5, max=65), stop=stop_after_attempt(4))
 def complete(
     prompt: str,
     system: str = "",
@@ -106,6 +135,7 @@ def complete(
         return cache[key]
 
     client = _get_client()
+    _throttle()
     response = client.models.generate_content(
         model=model,
         contents=prompt,

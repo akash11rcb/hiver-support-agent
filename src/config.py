@@ -41,14 +41,24 @@ def brand_conversations_path(brand: str | None = None) -> Path:
 # through src/llm_client.complete()), so this is a one-file swap if you'd
 # rather point it at a different provider/key.
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-# gemini-3.6-flash (the newest model) turned out to have only a 20-requests/
-# day free quota -- brand-new models get the stingiest free tier. Stepping
-# back to gemini-2.0-flash, an older/established model, for a much more
-# usable free daily quota. Test with scripts/00_test_llm.py before a big run
-# if you change this -- see decision_log.md.
-CLASSIFIER_MODEL = os.getenv("CLASSIFIER_MODEL", "gemini-2.0-flash")
-DRAFTER_MODEL = os.getenv("DRAFTER_MODEL", "gemini-2.0-flash")
-JUDGE_MODEL = os.getenv("JUDGE_MODEL", "gemini-2.0-flash")
+# gemini-3.6-flash (the newest model at the time) turned out to have only a
+# 20-requests/day free quota, and gemini-2.5-flash / gemini-2.0-flash have
+# since been retired for this account (both 404 now). gemini-3.5-flash-lite
+# is the current cost-optimized model and has a much more usable free-tier
+# *per-minute* quota (15 RPM, confirmed via scripts/00b_find_working_model.py
+# -- run that if this model ever stops working, it sweeps several candidates
+# in seconds). Test with scripts/00_test_llm.py before a big run if you
+# change this -- see decision_log.md.
+CLASSIFIER_MODEL = os.getenv("CLASSIFIER_MODEL", "gemini-3.5-flash-lite")
+DRAFTER_MODEL = os.getenv("DRAFTER_MODEL", "gemini-3.5-flash-lite")
+JUDGE_MODEL = os.getenv("JUDGE_MODEL", "gemini-3.5-flash-lite")
+
+# The free tier enforces a per-minute request cap (15 RPM for
+# gemini-3.5-flash-lite) rather than a daily cap. llm_client throttles
+# itself to REQUESTS_PER_MINUTE (kept a bit under the real limit as margin)
+# so a long run paces itself instead of bursting into 429s that a plain
+# retry-with-backoff can't reliably outlast within one minute.
+REQUESTS_PER_MINUTE = int(os.getenv("REQUESTS_PER_MINUTE", "12"))
 
 # Subsample sizes -- kept small deliberately so the full pipeline reproduces
 # in well under 15 minutes on a laptop with no GPU. See README "Reproducing

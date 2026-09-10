@@ -23,11 +23,24 @@ from typing import Optional
 def load_twcs(path) -> pd.DataFrame:
     df = pd.read_csv(
         path,
-        dtype={"tweet_id": "int64", "author_id": "string"},
+        dtype={
+            "tweet_id": "int64",
+            "author_id": "string",
+            # Force these to string: they're usually a single numeric id or a
+            # comma-separated list, but when a subsample happens to contain
+            # no comma-separated rows, pandas silently infers float64 instead
+            # -- which turns id "2" into "2.0" and breaks downstream parsing.
+            "response_tweet_id": "string",
+            "in_response_to_tweet_id": "string",
+        },
         low_memory=False,
     )
     df["inbound"] = df["inbound"].astype(str).str.strip().str.lower() == "true"
-    df["created_at"] = pd.to_datetime(df["created_at"], errors="coerce", utc=True)
+    # Twitter's native format, e.g. "Wed Oct 11 06:55:44 +0000 2017". Explicit
+    # format avoids a slow per-row dateutil fallback and a noisy warning.
+    df["created_at"] = pd.to_datetime(
+        df["created_at"], format="%a %b %d %H:%M:%S %z %Y", errors="coerce", utc=True
+    )
     return df
 
 

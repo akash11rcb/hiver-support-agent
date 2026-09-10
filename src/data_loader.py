@@ -15,6 +15,7 @@ Raw schema (one row per tweet):
 """
 from __future__ import annotations
 
+import json
 import pandas as pd
 from dataclasses import dataclass, field
 from typing import Optional
@@ -58,6 +59,22 @@ class Turn:
     text: str
     created_at: object
 
+    def to_dict(self) -> dict:
+        return {
+            "tweet_id": self.tweet_id,
+            "author_id": self.author_id,
+            "inbound": self.inbound,
+            "text": self.text,
+            "created_at": str(self.created_at) if self.created_at is not None else None,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "Turn":
+        return cls(
+            tweet_id=d["tweet_id"], author_id=d["author_id"], inbound=d["inbound"],
+            text=d["text"], created_at=d.get("created_at"),
+        )
+
 
 @dataclass
 class Conversation:
@@ -72,12 +89,35 @@ class Conversation:
     def n_customer_turns(self) -> int:
         return sum(1 for t in self.turns if t.inbound)
 
+    def to_dict(self) -> dict:
+        return {"root_tweet_id": self.root_tweet_id, "turns": [t.to_dict() for t in self.turns]}
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "Conversation":
+        return cls(root_tweet_id=d["root_tweet_id"], turns=[Turn.from_dict(t) for t in d["turns"]])
+
     def as_text(self) -> str:
         lines = []
         for t in self.turns:
             speaker = "Customer" if t.inbound else "Agent"
             lines.append(f"{speaker}: {t.text}")
         return "\n".join(lines)
+
+
+def save_conversations(path, conversations: list) -> None:
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump([c.to_dict() for c in conversations], f, ensure_ascii=False)
+
+
+def load_conversations(path) -> list:
+    """Load conversations previously extracted by
+    scripts/local_extract_candidates.py (run on a machine that has the raw
+    twcs.csv -- see README "Getting the data" for why extraction happens
+    there rather than on the raw file inside this repo's own pipeline).
+    """
+    with open(path, "r", encoding="utf-8") as f:
+        raw = json.load(f)
+    return [Conversation.from_dict(d) for d in raw]
 
 
 def _first_live_response_id(resp_field, id_to_row) -> Optional[int]:

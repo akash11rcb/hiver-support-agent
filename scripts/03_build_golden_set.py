@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pandas as pd
 
 from src import config, classifier
-from src.data_loader import load_twcs, build_conversations_for_brand
+from src.data_loader import load_conversations
 
 TARGET_N = 200
 RANDOM_FRACTION = 0.5
@@ -35,8 +35,12 @@ MULTITURN_FRACTION = 0.25
 
 
 def main():
-    df = load_twcs(config.TWCS_PATH)
-    conversations = build_conversations_for_brand(df, config.BRAND_HANDLE, max_turns=12)
+    path = config.brand_conversations_path()
+    if not path.exists():
+        print(f"Missing {path}. Run local_extract_candidates.py and pull its "
+              f"output in first (see README).")
+        sys.exit(1)
+    conversations = load_conversations(path)
     print(f"{len(conversations)} reconstructed conversations for {config.BRAND_HANDLE}")
 
     import random
@@ -50,13 +54,15 @@ def main():
     n_keyword = TARGET_N - n_random - n_multiturn
 
     random_pick = rng.sample(single, min(n_random, len(single)))
+    random_pick_ids = {c.root_tweet_id for c in random_pick}
+
     multiturn_pick = rng.sample(multiturn, min(n_multiturn, len(multiturn)))
 
     # Keyword bucket: anything with an anger/urgency/billing-ish marker, to
     # make sure rarer high-stakes intents show up in the golden set at all.
     KEYWORDS = ["refund", "charge", "bill", "cancel", "hack", "fraud", "broken",
                 "not working", "lawyer", "scam", "angry", "disappointed", "urgent"]
-    remaining = [c for c in single if c not in random_pick]
+    remaining = [c for c in single if c.root_tweet_id not in random_pick_ids]
     keyword_pick = [
         c for c in remaining
         if any(k in c.turns[0].text.lower() for k in KEYWORDS)

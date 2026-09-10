@@ -22,8 +22,8 @@ cp .env.example .env   # then fill in ANTHROPIC_API_KEY
 
 ## Getting the data
 
-This repo does not redistribute the dataset (Kaggle's terms, and it's ~2.7GB
-uncompressed). Get it yourself:
+This repo does not redistribute the dataset (Kaggle's terms, and the raw file
+is ~500MB+). Get it yourself:
 
 ```bash
 # Requires a free Kaggle account + API token (~/.kaggle/kaggle.json)
@@ -32,10 +32,28 @@ unzip customer-support-on-twitter.zip -d data/raw/
 # You should now have data/raw/twcs.csv
 ```
 
-## Reproducing the headline results (~10-15 min on a laptop, no GPU)
+Then extract the working subsample this pipeline actually runs on:
 
 ```bash
-python scripts/01_explore_and_pick_brand.py     # ranks brands, ~2 min
+python scripts/local_extract_candidates.py   # standalone, only needs pandas+twcs.csv
+```
+
+This ranks brands by volume and reconstructs conversation threads for the
+top 10 candidates (capped at 8000 tweets/brand), writing small JSON files to
+`data/processed/extracted/`. Everything after this point (picking a brand,
+building the golden set, running the agent, evaluating) only touches those
+small extracted files, never the raw 500MB+ CSV directly — see
+decision_log.md for why (this was actually built with the raw file living on
+a different machine than the one running the rest of the pipeline, for
+sandboxing reasons; `local_extract_candidates.py` is the deliberately
+dependency-free bridge between the two).
+
+## Reproducing the headline results (~10-15 min on a laptop, no GPU)
+
+Assuming `data/processed/extracted/` is populated (previous section):
+
+```bash
+python scripts/01_explore_and_pick_brand.py     # prints the brand comparison
 python scripts/02_sample_for_taxonomy.py        # dumps a sample to read
 python scripts/03_build_golden_set.py           # samples + LLM-drafts labels
 #   -> open eval/golden_set_draft.csv, fill human_intent / human_escalate

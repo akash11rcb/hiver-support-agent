@@ -67,12 +67,20 @@ real data (brand choice, taxonomy specifics, threshold values).
     id**, producing one linear thread per conversation rather than exploring
     every branch. Matches how a human agent reads a thread top-to-bottom;
     documented simplification rather than a silent one.
-13. **Data acquisition is manual, not scripted end-to-end.** This build
-    sandbox couldn't reach Kaggle's servers directly (network policy), so the
-    dataset was brought in via a locally-connected folder rather than a
-    `download_data.py` that hits Kaggle's API from inside the pipeline. The
-    README's Kaggle CLI instructions are what a reviewer with normal network
-    access should actually run.
+13. **Raw-CSV processing and everything downstream run on different
+    machines, bridged by one dependency-free script.** The build sandbox
+    couldn't reach Kaggle's servers, and separately couldn't move the raw
+    ~500MB+ `twcs.csv` wholesale onto the machine running the rest of the
+    pipeline (a hard transfer-size limit). Rather than force both onto one
+    machine, `scripts/local_extract_candidates.py` is a standalone,
+    zero-import script (only needs pandas) that does the one thing that
+    needs the raw file -- rank brands and reconstruct conversation threads --
+    and writes small per-brand JSON. Everything else (`src/`, `eval/`, the
+    rest of `scripts/`) only ever touches those small JSON files via
+    `data_loader.load_conversations`. A reviewer with normal, unrestricted
+    access to both the dataset and their own machine can just run it locally
+    with everything else, in the same place -- the split is a constraint of
+    how this was built, not a requirement to reproduce it.
 14. **[TBD]** Brand choice and why — filled in after `01_explore_and_pick_brand.py`.
 15. **[TBD]** Final intent taxonomy and what got merged/dropped from the first draft.
 16. **[TBD]** Escalation rule thresholds (confidence cutoff, anger keyword list,

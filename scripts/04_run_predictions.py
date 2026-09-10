@@ -25,7 +25,7 @@ import pandas as pd
 from sklearn.model_selection import KFold
 
 from src import config, classifier, pipeline
-from src.data_loader import load_twcs, build_conversations_for_brand
+from src.data_loader import load_conversations
 from src.retriever import GroundingCorpus
 from eval import judge as judge_mod
 
@@ -58,8 +58,7 @@ def main():
     )
     print(f"Loaded {len(golden)} golden rows")
 
-    df = load_twcs(config.TWCS_PATH)
-    conversations = build_conversations_for_brand(df, config.BRAND_HANDLE, max_turns=12)
+    conversations = load_conversations(config.brand_conversations_path())
     corpus = GroundingCorpus.build(conversations)
     print(f"Grounding corpus: {len(conversations)} conversations")
 

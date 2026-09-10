@@ -25,7 +25,8 @@ def main():
         )
         print(f"SUCCESS. Model replied: {out!r}")
     except Exception as e:
-        print(f"FAILED: {type(e).__name__}: {e}")
+        root = llm_client.unwrap_retry_error(e)
+        print(f"FAILED: {type(root).__name__}: {root}")
         sys.exit(1)
 
 

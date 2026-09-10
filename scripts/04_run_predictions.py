@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pandas as pd
 from sklearn.model_selection import KFold
 
-from src import config, classifier, pipeline
+from src import config, classifier, pipeline, llm_client
 from src.data_loader import load_conversations
 from src.retriever import GroundingCorpus
 from eval import judge as judge_mod
@@ -99,7 +99,8 @@ def main():
                 jscore = judge_mod.judge_reply(row["text"], agent.draft_reply, grounding_text)
             except Exception as e:
                 print(f"\nSTOPPED after {n_done_this_run} new rows this run "
-                      f"({len(done_ids) + n_done_this_run}/{len(golden)} total) -- {type(e).__name__}: {e}")
+                      f"({len(done_ids) + n_done_this_run}/{len(golden)} total) -- "
+                      f"{type(llm_client.unwrap_retry_error(e)).__name__}: {llm_client.unwrap_retry_error(e)}")
                 print(f"Progress is saved in {out_path}. Re-run this script to "
                       f"continue (it skips rows already done). If this is a "
                       f"daily-quota error, wait for the quota to reset (usually "

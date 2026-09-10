@@ -75,6 +75,18 @@ def _append_cache(key: str, response: str) -> None:
         _load_cache()[key] = response
 
 
+def unwrap_retry_error(e: Exception) -> Exception:
+    """tenacity's RetryError hides the real API error behind a generic
+    message. Callers that catch an exception from `complete()` and print it
+    for a human should print unwrap_retry_error(e), not e itself."""
+    if hasattr(e, "last_attempt"):
+        try:
+            return e.last_attempt.exception() or e
+        except Exception:
+            pass
+    return e
+
+
 @retry(wait=wait_random_exponential(min=2, max=30), stop=stop_after_attempt(6))
 def complete(
     prompt: str,

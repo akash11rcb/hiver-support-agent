@@ -70,14 +70,18 @@ Everything after the first LLM call is cached to `.cache/llm_cache.jsonl`, so
 re-running any script after the first pass is fast and deterministic (no
 repeat API spend, no re-rolled outputs).
 
-**On a free-tier API key:** daily request quotas vary by model and can be
-small (see decision_log.md #19). `03_build_golden_set.py` and
-`04_run_predictions.py` are both resumable -- they save each row to disk as
-soon as it's done and skip rows already present on a re-run, so if you hit a
-quota wall partway through, just wait for it to reset (usually ~24h) and
-re-run the same command; it picks up where it left off rather than starting
-over. A paid key with a normal quota runs either script to completion in one
-go.
+**On a free-tier API key:** the real constraint turned out to be a
+per-minute request cap (15 RPM for `gemini-3.5-flash-lite`), not a daily
+one -- see decision_log.md #21. `llm_client.py` self-throttles to stay
+under that (`REQUESTS_PER_MINUTE`, default 12), so both `03_build_golden_set.py`
+and `04_run_predictions.py` just run steadily at that pace rather than
+bursting into 429s; expect ~12 rows/minute on a fresh (uncached) run. Both
+are also resumable regardless -- they save each row to disk as soon as it's
+done and skip rows already present on a re-run, so if a run is interrupted
+for any reason, re-running the same command picks up where it left off. If
+you do hit a genuine daily cap on some model/key, run
+`scripts/00b_find_working_model.py` to find another working model in
+seconds rather than guessing.
 
 **We already ran the golden-set labeling and human-rating steps** — the
 finalized `eval/golden_set.csv` and `eval/human_rating_draft.csv` are

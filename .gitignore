@@ -1,0 +1,15 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Raw dataset is large and not redistributed with the repo
+data/raw/*.csv
+data/raw/*.zip
+!data/raw/.gitkeep
+
+# Cache directories for LLM calls (rebuilt on demand)
+.cache/
+*.cache.jsonl

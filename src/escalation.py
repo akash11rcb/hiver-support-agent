@@ -17,9 +17,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 # Intents that go to a human regardless of classifier confidence, because
-# getting them wrong is costly (safety, legal, money, account access) --
-# finalize this list against the real taxonomy in taxonomy.py.
-ALWAYS_ESCALATE_INTENTS: set[str] = set()
+# getting them wrong is costly. For Uber_Support, that's exactly one intent:
+# safety_incident (crashes, threats, harassment, reckless driving) -- see
+# src/taxonomy.py and decision_log.md #16. billing_dispute and lost_item are
+# deliberately NOT on this list: they're common and usually resolvable
+# without a human, so they go through the normal confidence/anger/turns
+# rules below instead of being blanket-escalated.
+ALWAYS_ESCALATE_INTENTS: set[str] = {"safety_incident"}
 
 MIN_CLASSIFIER_CONFIDENCE = 0.6
 MAX_UNRESOLVED_CUSTOMER_TURNS = 2  # customer had to repeat themselves this many times
@@ -27,6 +31,12 @@ MAX_UNRESOLVED_CUSTOMER_TURNS = 2  # customer had to repeat themselves this many
 _ANGER_MARKERS = [
     "lawsuit", "lawyer", "sue", "scam", "fraud", "unacceptable", "disgusting",
     "worst", "never again", "cancel my", "refund now", "furious", "ceo",
+    # account-security language: showed up repeatedly in the real Uber_Support
+    # sample (hacked accounts, impersonation, unexplained bans) and, like
+    # safety_incident, is a case where a wrong auto-handled reply is costly
+    # -- see decision_log.md #16.
+    "hacked", "hack my", "impersonat", "banned", "disabled my account",
+    "kidnap", "sexually harass", "harassed",
 ]
 
 

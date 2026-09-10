@@ -26,7 +26,7 @@ EXTRACTED_DIR = DATA_PROCESSED / "extracted"
 
 # The brand this whole repo is built around. Set by scripts/01_explore_and_pick_brand.py
 # and then frozen here once chosen -- see decision_log.md for why this brand.
-BRAND_HANDLE = os.getenv("BRAND_HANDLE", "AppleSupport")
+BRAND_HANDLE = os.getenv("BRAND_HANDLE", "Uber_Support")
 
 
 def brand_conversations_path(brand: str | None = None) -> Path:

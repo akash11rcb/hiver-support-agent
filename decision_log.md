@@ -81,7 +81,53 @@ real data (brand choice, taxonomy specifics, threshold values).
     access to both the dataset and their own machine can just run it locally
     with everything else, in the same place -- the split is a constraint of
     how this was built, not a requirement to reproduce it.
-14. **[TBD]** Brand choice and why — filled in after `01_explore_and_pick_brand.py`.
-15. **[TBD]** Final intent taxonomy and what got merged/dropped from the first draft.
-16. **[TBD]** Escalation rule thresholds (confidence cutoff, anger keyword list,
-    multi-turn cutoff) — filled in once tuned against the golden set.
+14. **Brand: Uber_Support.** Of the top 3 candidates by volume with clean
+    English text (Uber_Support, AppleSupport, AmazonHelp -- AmazonHelp was
+    noticeably multilingual, which would confound a taxonomy built assuming
+    English), Uber_Support gives the escalation-decision half of the
+    assignment real stakes: genuine safety incidents (crashes, driver
+    misconduct) and payment disputes sit alongside routine questions, so
+    "auto-handle vs. escalate, with a reason" has to do real work, not just
+    triage mild annoyance. 56,270 total tweets, 7,488 reconstructed
+    conversations sampled, 46% multi-turn.
+15. **9-intent taxonomy (+ `other`), read off ~120 real sampled messages,
+    not guessed; expanded once from an initial 8 after reading a second
+    batch.** Final list: `safety_incident`, `driver_conduct_complaint`,
+    `delivery_order_issue`, `billing_dispute`, `payment_or_app_technical_issue`,
+    `account_access_or_security`, `lost_item`, `driver_account_onboarding`,
+    `general_inquiry`, `other`. Notable calls:
+    - `delivery_order_issue` (Uber Eats: wrong/missing/cold food, no-show
+      courier) was split out as its own intent rather than stretched onto
+      `driver_conduct_complaint`, because it's a different product line with
+      a different resolution pattern (redeliver/refund an order, not
+      reconnect with a ride driver) and it was common enough in the sample
+      to be statistically real, not a one-off.
+    - `account_access_or_security` (hacked, impersonated, banned/disabled
+      without explanation, can't log in) was split out from
+      `driver_account_onboarding` because it's the *rider's* account, not a
+      driver's, and it showed up often enough (several independent examples)
+      to deserve its own bucket rather than falling into `other`.
+    - "Lost item due to driver negligence" was folded into `lost_item` rather
+      than `driver_conduct_complaint`, because the resolution path (reconnect
+      rider and driver) is the same regardless of fault, and that resolution
+      path is what reply-drafting actually needs to get right.
+    - "I want a refund" was folded into `billing_dispute` rather than kept
+      separate, since in the sampled data it was always attached to a
+      specific bad trip/charge, never a standalone category.
+    - `driver_account_onboarding` stayed separate from `general_inquiry`
+      because drivers, not riders, send it, with a background-check/payout
+      resolution pattern that has nothing to do with a rider's trip.
+16. **Only `safety_incident` is on `ALWAYS_ESCALATE_INTENTS`** -- not
+    `account_access_or_security` too, even though both are high-stakes.
+    `billing_dispute`, `lost_item`, and `account_access_or_security` are all
+    common and usually resolvable without a human (see the sampled data), so
+    they're deliberately routed through the normal
+    confidence/anger-keyword/repeated-turns rules instead of a blanket
+    escalation -- otherwise "escalate" would fire on a large fraction of all
+    traffic and stop meaning anything. Instead, the anger-keyword list was
+    extended with account-security terms ("hacked", "impersonat", "banned",
+    "disabled my account") plus a couple of severe-harassment terms
+    ("kidnap", "sexually harass") that appeared verbatim-ish in the real
+    sample, so the worst `account_access_or_security` and
+    `driver_conduct_complaint` cases still escalate via that rule even though
+    the intent itself isn't blanket-escalated.

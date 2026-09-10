@@ -1,6 +1,6 @@
 # Report
 
-*Brand: [TBD — filled in once `local_extract_candidates.py` output is pulled in and a brand is picked]*
+*Brand: **Uber_Support** (Twitter/X handle @Uber_Support). Chosen over AppleSupport and AmazonHelp for its genuine escalation stakes (safety incidents, payment disputes) -- see decision_log.md #14.*
 
 ## Problem framing
 

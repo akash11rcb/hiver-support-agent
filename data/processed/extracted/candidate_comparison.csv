@@ -1,0 +1,11 @@
+brand,n_tweets_total,n_conversations_reconstructed,n_multiturn,avg_opening_msg_len,json_file
+AppleSupport,106860,7683,3566,116.5,AppleSupport.json
+Uber_Support,56270,7488,3430,128.7,Uber_Support.json
+AmazonHelp,169840,7330,5154,128.4,AmazonHelp.json
+AmericanAir,36764,7211,3804,129.7,AmericanAir.json
+comcastcares,33031,7114,2519,115.6,comcastcares.json
+SpotifyCares,43265,7105,3533,114.0,SpotifyCares.json
+Delta,42253,6944,3046,121.3,Delta.json
+TMobileHelp,34317,6564,2971,118.3,TMobileHelp.json
+British_Airways,29361,6495,3266,136.4,British_Airways.json
+Tesco,38573,6303,3176,129.4,Tesco.json

@@ -87,7 +87,30 @@ seconds rather than guessing.
 finalized `eval/golden_set.csv` and `eval/human_rating_draft.csv` are
 committed, so a reviewer can skip straight to `04_run_predictions.py` /
 `05_evaluate.py` / `06b_compute_judge_agreement.py` and still reproduce the
-headline numbers without re-labeling anything.
+headline numbers without re-labeling anything. `eval/predictions.jsonl`,
+`eval/results.json`, and `eval/judge_human_agreement.json` from our own run
+are committed too, so the numbers below are checkable without running
+anything at all.
+
+## Headline results (see report.md for the full picture)
+
+| | Accuracy | Macro-F1 |
+|---|---|---|
+| Trivial baseline | 0.290 | 0.045 |
+| TF-IDF + LogReg baseline | 0.540 | 0.410 |
+| **LLM classifier** | **0.955** | **0.954** |
+
+Escalation decision: F1 0.659 (precision 0.667, recall 0.652) — the honest
+number, since 77% of the golden set legitimately shouldn't escalate, which
+inflates plain accuracy (0.845) on its own.
+
+Reply quality (LLM-as-judge): 4.92/5 average — **but treat this number as
+unreliable.** A 40-item blind human rating shows essentially no agreement
+with the judge (quadratic-weighted kappa 0.012, Spearman ρ not
+statistically significant); the judge scored 39 of 40 sampled replies a
+flat 5 regardless of what a human thought of them. This is the report's
+mandatory "misleading headline number" finding — read that section before
+citing the 4.92 anywhere.
 
 ## Repo layout
 

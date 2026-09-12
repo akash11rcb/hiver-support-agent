@@ -1,0 +1,478 @@
+{
+  "n": 200,
+  "brand": "Uber_Support",
+  "classification_trivial_pred_intent": {
+    "accuracy": 0.29,
+    "macro_f1": 0.04496124031007752,
+    "per_class_f1": {
+      "account_access_or_security": 0.0,
+      "billing_dispute": 0.4496124031007752,
+      "delivery_order_issue": 0.0,
+      "driver_account_onboarding": 0.0,
+      "driver_conduct_complaint": 0.0,
+      "general_inquiry": 0.0,
+      "lost_item": 0.0,
+      "other": 0.0,
+      "payment_or_app_technical_issue": 0.0,
+      "safety_incident": 0.0
+    },
+    "confusion_matrix": [
+      [
+        0,
+        11,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        58,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        25,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        34,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        28,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        7,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        21,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        9,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "labels": [
+      "account_access_or_security",
+      "billing_dispute",
+      "delivery_order_issue",
+      "driver_account_onboarding",
+      "driver_conduct_complaint",
+      "general_inquiry",
+      "lost_item",
+      "other",
+      "payment_or_app_technical_issue",
+      "safety_incident"
+    ]
+  },
+  "classification_simple_pred_intent": {
+    "accuracy": 0.54,
+    "macro_f1": 0.4100621969539741,
+    "per_class_f1": {
+      "account_access_or_security": 0.6923076923076923,
+      "billing_dispute": 0.5950413223140496,
+      "delivery_order_issue": 0.75,
+      "driver_account_onboarding": 0.0,
+      "driver_conduct_complaint": 0.43902439024390244,
+      "general_inquiry": 0.3829787234042553,
+      "lost_item": 0.4,
+      "other": 0.2222222222222222,
+      "payment_or_app_technical_issue": 0.6190476190476191,
+      "safety_incident": 0.0
+    },
+    "confusion_matrix": [
+      [
+        9,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        36,
+        2,
+        0,
+        13,
+        1,
+        0,
+        0,
+        3,
+        0
+      ],
+      [
+        0,
+        2,
+        21,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        10,
+        1,
+        0,
+        18,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        6,
+        1,
+        0,
+        10,
+        9,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        3,
+        0,
+        0,
+        2,
+        0,
+        1,
+        1,
+        0
+      ],
+      [
+        2,
+        2,
+        2,
+        0,
+        1,
+        1,
+        0,
+        0,
+        13,
+        0
+      ],
+      [
+        0,
+        4,
+        1,
+        0,
+        3,
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    ],
+    "labels": [
+      "account_access_or_security",
+      "billing_dispute",
+      "delivery_order_issue",
+      "driver_account_onboarding",
+      "driver_conduct_complaint",
+      "general_inquiry",
+      "lost_item",
+      "other",
+      "payment_or_app_technical_issue",
+      "safety_incident"
+    ]
+  },
+  "classification_llm_pred_intent": {
+    "accuracy": 0.955,
+    "macro_f1": 0.9539511741716394,
+    "per_class_f1": {
+      "account_access_or_security": 0.9523809523809523,
+      "billing_dispute": 0.9739130434782609,
+      "delivery_order_issue": 1.0,
+      "driver_account_onboarding": 1.0,
+      "driver_conduct_complaint": 0.9253731343283582,
+      "general_inquiry": 0.9473684210526315,
+      "lost_item": 1.0,
+      "other": 0.9333333333333333,
+      "payment_or_app_technical_issue": 0.95,
+      "safety_incident": 0.8571428571428571
+    },
+    "confusion_matrix": [
+      [
+        10,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        56,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        25,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        31,
+        0,
+        0,
+        0,
+        0,
+        3
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        27,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        7,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        19,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        9
+      ]
+    ],
+    "labels": [
+      "account_access_or_security",
+      "billing_dispute",
+      "delivery_order_issue",
+      "driver_account_onboarding",
+      "driver_conduct_complaint",
+      "general_inquiry",
+      "lost_item",
+      "other",
+      "payment_or_app_technical_issue",
+      "safety_incident"
+    ]
+  },
+  "escalation": {
+    "accuracy": 0.845,
+    "precision_escalate": 0.6666666666666666,
+    "recall_escalate": 0.6521739130434783,
+    "f1_escalate": 0.6593406593406593,
+    "confusion_matrix": [
+      [
+        139,
+        15
+      ],
+      [
+        16,
+        30
+      ]
+    ]
+  },
+  "judge_means": {
+    "judge_grounded": 4.95,
+    "judge_relevant": 4.94,
+    "judge_tone": 4.925,
+    "judge_actionable": 4.945,
+    "judge_overall": 4.925
+  },
+  "judge_overall_mean_on_auto_handled": 4.922580645161291
+}

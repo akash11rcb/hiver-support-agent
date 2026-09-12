@@ -1,0 +1,8 @@
+{
+  "n": 40,
+  "spearman_rho": 0.1408625264344828,
+  "spearman_p": 0.38595457990476434,
+  "quadratic_weighted_kappa": 0.011655011655011704,
+  "exact_match_rate": 0.15,
+  "within_1_point_rate": 0.65
+}

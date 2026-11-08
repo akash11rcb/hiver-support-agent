@@ -1,4 +1,4 @@
-# Hiver SDE Intern Assignment — AI Support Agent
+# Hiver SDE — AI Support Agent
 
 An AI support agent for **Uber_Support**, built on the
 [Customer Support on Twitter](https://www.kaggle.com/datasets/thoughtvector/customer-support-on-twitter)
